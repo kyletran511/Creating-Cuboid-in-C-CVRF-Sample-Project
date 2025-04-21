@@ -16,6 +16,8 @@ void main(int argc, char ** argv)
 	// Print out and store cuboid dimensions
 	printf("Cuboid length: ");
 	printf(argv[1]);
+	
+	//assigning a char* to an int
 	int x = argv[1];
 	printf("\n");
 
