@@ -12,7 +12,7 @@ int main(int argc, char ** argv)
 	// Check to make sure user passes three arguments (file name counts as 1 argument):
 	if (argc != 4)
 	{
-		//printf("Please pass the following three arguments: x, y, z\n");
+		printf("Please pass the following three arguments: x, y, z\n");
 		return 1;
 	}	
 
@@ -65,7 +65,7 @@ void generate_cuboid(char *cuboid, int x_len, int y_len, int z_len)
 		int k = index;
 
 		// 1. Calculate number of leading spaces 
-        int spaces = abs(y_len - i);
+        int spaces = abs(y_len - i) + (i == 0 ? 1 : 0);
         for (int s = 0; s < spaces; s++) {
             cuboid[k++] = ' ';
         }
@@ -130,7 +130,7 @@ void generate_cuboid(char *cuboid, int x_len, int y_len, int z_len)
             }
         }
 
-        cuboid[k++] = '\n';
+        if (i != lines-1) cuboid[k++] = '\n';
         index = k;
 	}
 	cuboid[index] = '\0'; //null-terminate
