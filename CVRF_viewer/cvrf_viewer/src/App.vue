@@ -12,4 +12,3 @@
 <script setup>
 import CvrfTable from './components/CVRF_Table.vue';
 </script>
-

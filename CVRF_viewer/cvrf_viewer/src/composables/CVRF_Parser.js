@@ -4,7 +4,7 @@ import { XMLParser } from 'fast-xml-parser';
 export function useCvrfData(itemsPerPage = 10) {
   const vulnerabilities = ref([]);
   const searchQuery = ref('');
-  const sortKey = ref('id');
+  const sortKey = ref('id'); // Default sorting by CVE ID
   const sortAsc = ref(true);
   const currentPage = ref(1);
 
@@ -30,7 +30,6 @@ export function useCvrfData(itemsPerPage = 10) {
         const title = vuln.Title || 'No Title';
         const cve = vuln.CVE || 'No CVE';
 
-        // Extract Notes
         let description = 'No description';
         let published = 'N/A';
         let modified = 'N/A';
@@ -44,7 +43,7 @@ export function useCvrfData(itemsPerPage = 10) {
         for (const note of notes) {
           if (note.Type === 'Description' && typeof note === 'object') {
             const text = note['#text'] || '';
-            if (text.includes('** RESERVED **')) return null; // ❌ Skip reserved entries
+            if (text.includes('** RESERVED **')) return null;
             description = text;
           } else if (note.Title === 'Published') {
             published = note['#text'] || published;
@@ -53,7 +52,6 @@ export function useCvrfData(itemsPerPage = 10) {
           }
         }
 
-        // Extract References
         const refList = vuln.References?.Reference;
         const references = Array.isArray(refList)
           ? refList
@@ -75,12 +73,14 @@ export function useCvrfData(itemsPerPage = 10) {
           references: parsedRefs,
         };
       })
-      .filter(Boolean); // Remove null entries (i.e., "** RESERVED **")
+      .filter(Boolean);
   };
 
   const loadXML = async () => {
     try {
-      const xml = await fetch('/allitems-cvrf-year-2022.xml').then((res) => res.text());
+      const xml = await fetch('/allitems-cvrf-year-2022.xml').then((res) =>
+        res.text()
+      );
       vulnerabilities.value = parseCvrfXML(xml);
     } catch (err) {
       console.error('Error loading/parsing CVRF XML:', err);
@@ -93,13 +93,23 @@ export function useCvrfData(itemsPerPage = 10) {
     )
   );
 
-  const sorted = computed(() =>
-    [...filtered.value].sort((a, b) => {
-      const aVal = a[sortKey.value]?.toLowerCase?.() || '';
-      const bVal = b[sortKey.value]?.toLowerCase?.() || '';
-      return sortAsc.value ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-    })
-  );
+  const sorted = computed(() => {
+    return [...filtered.value].sort((a, b) => {
+      const aVal = a[sortKey.value];
+      const bVal = b[sortKey.value];
+
+      if (!aVal || !bVal) return 0;
+
+      // Try to sort by date if possible
+      const isDate = sortKey.value === 'published' || sortKey.value === 'modified';
+      const valA = isDate ? new Date(aVal) : aVal.toString().toLowerCase();
+      const valB = isDate ? new Date(bVal) : bVal.toString().toLowerCase();
+
+      if (valA < valB) return sortAsc.value ? -1 : 1;
+      if (valA > valB) return sortAsc.value ? 1 : -1;
+      return 0;
+    });
+  });
 
   const totalPages = computed(() =>
     Math.ceil(sorted.value.length / itemsPerPage)
@@ -111,8 +121,9 @@ export function useCvrfData(itemsPerPage = 10) {
   });
 
   const sortBy = (key) => {
-    if (sortKey.value === key) sortAsc.value = !sortAsc.value;
-    else {
+    if (sortKey.value === key) {
+      sortAsc.value = !sortAsc.value;
+    } else {
       sortKey.value = key;
       sortAsc.value = true;
     }
@@ -140,6 +151,8 @@ export function useCvrfData(itemsPerPage = 10) {
     paginated,
     searchQuery,
     sortBy,
+    sortKey,
+    sortAsc,
     currentPage,
     totalPages,
     nextPage,

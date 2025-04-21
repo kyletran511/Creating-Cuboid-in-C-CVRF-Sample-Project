@@ -1,23 +1,45 @@
 <template>
-    <h2 class="text-3xl font-bold text-red-600">Tailwind is working!</h2>
-
     <div>
-      <!-- Search -->
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Search vulnerabilities by description..."
-        class="w-full mb-6 px-4 py-2 border border-gray-300 rounded shadow-sm focus:ring-2 focus:ring-blue-300"
-      />
-  
+        <!-- Controls: Search on left, Sort dropdowns on right -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 px-2">
+        <!-- Search -->
+        <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search vulnerabilities by description..."
+            class="w-full sm:w-1/2 mb-2 sm:mb-0 px-4 py-2 border border-gray-300 rounded shadow-sm focus:ring-2 focus:ring-blue-300"
+        />
+        <!-- Sorting Dropdowns -->
+        <div class="flex items-center gap-3 self-end sm:self-auto">
+            <label class="text-sm text-gray-600">Sort by:</label>
+            <select
+            v-model="sortKey"
+            @change="sortBy(sortKey)"
+            class="px-3 py-1 border border-gray-300 rounded shadow-sm text-sm focus:ring-2 focus:ring-blue-300"
+            >
+            <option value="title">Title</option>
+            <option value="published">Published Date</option>
+            <option value="modified">Modified Date</option>
+            </select>
+
+            <label class="text-sm text-gray-600">Order:</label>
+            <select
+            v-model="sortAsc"
+            class="px-3 py-1 border border-gray-300 rounded shadow-sm text-sm focus:ring-2 focus:ring-blue-300"
+            >
+            <option :value="true">Ascending</option>
+            <option :value="false">Descending</option>
+            </select>
+        </div>
+        </div>
       <!-- Table -->
       <div class="overflow-x-auto border rounded-lg shadow-md bg-white">
         <table class="w-full border-collapse text-sm">
           <thead class="bg-gray-100 text-left">
             <tr>
-              <th @click="sortBy('title')" class="px-4 py-3 border cursor-pointer">Title</th>
+              <th class="px-4 py-3 border">Title</th>
               <th class="px-4 py-3 border">Description</th>
-              <th @click="sortBy('published')" class="px-4 py-3 border cursor-pointer">Published</th>
+              <th class="px-4 py-3 border">Published</th>
               <th class="px-4 py-3 border">Modified</th>
               <th class="px-4 py-3 border">References</th>
             </tr>
@@ -28,8 +50,8 @@
               :key="vuln.id"
               class="hover:bg-blue-50 border-t"
             >
-              <td class="px-4 py-3 border font-medium break-all prose max-w-none">{{ vuln.title }}</td>
-              <td class="px-4 py-3 border whitespace-pre-wrap prose max-w-none">{{ vuln.description }}</td>
+              <td class="px-4 py-3 border font-medium break-all min-w-[280px] w-[300px] max-w-[400px]">{{ vuln.title }}</td>
+              <td class="px-4 py-3 border whitespace-pre-wrap prose min-w-[300px]">{{ vuln.description }}</td>
               <td class="px-4 py-3 border prose max-w-none">{{ vuln.published }}</td>
               <td class="px-4 py-3 border prose max-w-none">{{ vuln.modified }}</td>
               <td class="px-4 py-3 border prose max-w-none">
@@ -144,5 +166,3 @@
     return pages;
   });
   </script>
-  
-  
